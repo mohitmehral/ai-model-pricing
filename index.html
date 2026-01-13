@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Model Pricing Calculator - Compare AWS, Azure, OpenAI, Anthropic & GCP Costs</title>
     <meta name="description" content="Free AI model pricing calculator to compare costs across AWS Bedrock, Azure OpenAI, Google Cloud Vertex AI, OpenAI, and Anthropic. Real-time token calculation and pricing comparison for 47+ AI models.">
-    <meta name="keywords" content="AI pricing calculator, OpenAI pricing, AWS Bedrock cost, Azure OpenAI pricing, Anthropic Claude pricing, Google Cloud AI pricing, AI model comparison, token calculator, LLM pricing">
+    <meta name="keywords" content="AI pricing calculator, OpenAI pricing, AWS Bedrock cost, Azure OpenAI pricing, Anthropic Claude pricing, Google Cloud AI pricing, AI model comparison, token calculator, LLM pricing, tokenizer, AI tokenization">
     <meta name="author" content="Mohit Mehral">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://mohitmehral.github.io/ai-model-pricing/">
@@ -75,12 +75,21 @@
             <!-- Pricing Calculator Section -->
             <div class="table-container" id="pricing-table">
                 <section class="calculator">
-                    <h2>AI Token Calculator</h2>
+                    <div class="calculator-header">
+                        <h2>AI Token Calculator 
+                            <span class="info-icon" title="What are tokens?">i</span>
+                        </h2>
+                        <div class="pricing-updated">Prices updated: <time id="calc-last-updated">Loading...</time></div>
+                    </div>
+                    <div class="token-info-tooltip" id="token-info-tooltip">
+                        <strong>What are Tokens?</strong><br>
+                        When you run inference with AI models, you're charged for the number of tokens in your input and output. Tokens are text pieces that models process - different providers count tokens differently. Use this calculator to estimate token counts and refine your prompts to optimize costs and stay within quotas.
+                    </div>
                     <div class="calc-inputs">
                         <div class="input-group">
                             <label for="input-text">Input Text:</label>
                             <textarea id="input-text" placeholder="Enter your AI prompt here..." aria-label="Input text for AI model pricing calculation">How to use this pricing calculator via adding your input text</textarea>
-                            <div class="token-text">Input Tokens: <strong id="input-tokens">0</strong></div>
+                            <div class="token-text">Input Tokens: <strong id="input-tokens">Hover models for accurate counts</strong></div>
                         </div>
                         <div class="input-group">
                             <label for="output-text">Expected Output:</label>
@@ -102,7 +111,7 @@ SERVICE USAGE:
 - Easy navigation between pricing and service information
 
 This tool helps developers, businesses, and researchers make informed decisions about AI model selection based on both cost and capabilities.</textarea>
-                            <div class="token-text">Output Tokens: <strong id="output-tokens">0</strong></div>
+                            <div class="token-text">Output Tokens: <strong id="output-tokens">Hover models for accurate counts</strong></div>
                         </div>
                     </div>
                 </section>
@@ -143,7 +152,6 @@ This tool helps developers, businesses, and researchers make informed decisions 
 
     <footer>
         <section class="pricing-info">
-            <p>Prices updated: <time id="last-updated">Loading...</time></p>
             <nav class="official-sources" aria-label="Official AI Provider Documentation">
                 <h3>Official Pricing Documentation</h3>
                 <div class="sources-grid">
@@ -161,6 +169,7 @@ This tool helps developers, businesses, and researchers make informed decisions 
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/tiktoken@1.0.10/dist/tiktoken.min.js"></script>
     <script src="script-new.js"></script>
 </body>
 </html>

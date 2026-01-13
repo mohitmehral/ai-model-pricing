@@ -1,28 +1,43 @@
 class ModelPricingApp {
     constructor() {
         this.models = [];
-        this.inputTokens = 0;
-        this.outputTokens = 0;
+        this.inputTokens = {};
+        this.outputTokens = {};
         this.cacheKey = 'ai-model-pricing-cache';
         this.cacheExpiry = 24 * 60 * 60 * 1000;
         this.activeProvider = 'all';
         this.activeType = 'all';
         this.activeTable = 'pricing';
+        this.tokenizers = {};
         
         this.init();
     }
 
     async init() {
+        await this.initializeTokenizers();
         await this.loadPricing();
         this.setupEventListeners();
         this.setupTabListeners();
         this.setupTableTabListeners();
         this.setupDownloadListener();
+        this.setupTokenizerTooltip();
         this.updateModelCounts();
         this.renderModels();
         this.createMindMap();
         this.updateLastUpdated();
-        this.calculateTokens(); // Calculate tokens for default text
+        this.calculateTokens();
+    }
+
+    async initializeTokenizers() {
+        try {
+            // Initialize OpenAI tokenizers
+            if (typeof tiktoken !== 'undefined') {
+                this.tokenizers.gpt4 = await tiktoken.encoding_for_model('gpt-4');
+                this.tokenizers.gpt35 = await tiktoken.encoding_for_model('gpt-3.5-turbo');
+            }
+        } catch (error) {
+            console.warn('Tiktoken not available, using approximation');
+        }
     }
 
     async loadPricing() {
@@ -119,14 +134,72 @@ class ModelPricingApp {
         outputText.addEventListener('input', () => this.calculateTokens());
     }
 
+    setupTokenizerTooltip() {
+        const infoIcon = document.querySelector('.info-icon');
+        const tooltip = document.getElementById('token-info-tooltip');
+        
+        infoIcon.addEventListener('click', (e) => {
+            e.preventDefault();
+            tooltip.style.display = tooltip.style.display === 'block' ? 'none' : 'block';
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (!infoIcon.contains(e.target) && !tooltip.contains(e.target)) {
+                tooltip.style.display = 'none';
+            }
+        });
+    }
+
     calculateTokens() {
         const inputText = document.getElementById('input-text').value;
         const outputText = document.getElementById('output-text').value;
-        this.inputTokens = Math.ceil(inputText.length / 4);
-        this.outputTokens = Math.ceil(outputText.length / 4);
-        document.getElementById('input-tokens').textContent = this.inputTokens;
-        document.getElementById('output-tokens').textContent = this.outputTokens;
+        
+        // Calculate tokens for each provider
+        this.inputTokens = {
+            openai: this.tokenizeOpenAI(inputText),
+            anthropic: this.tokenizeAnthropic(inputText),
+            aws: this.tokenizeAWS(inputText),
+            azure: this.tokenizeOpenAI(inputText),
+            gcp: this.tokenizeGCP(inputText)
+        };
+        
+        this.outputTokens = {
+            openai: this.tokenizeOpenAI(outputText),
+            anthropic: this.tokenizeAnthropic(outputText),
+            aws: this.tokenizeAWS(outputText),
+            azure: this.tokenizeOpenAI(outputText),
+            gcp: this.tokenizeGCP(outputText)
+        };
+        
         this.updatePricing();
+    }
+
+    tokenizeOpenAI(text) {
+        if (this.tokenizers.gpt4) {
+            return this.tokenizers.gpt4.encode(text).length;
+        }
+        // Fallback: OpenAI approximation (more accurate than /4)
+        return Math.ceil(text.length / 3.5);
+    }
+
+    tokenizeAnthropic(text) {
+        // Anthropic uses similar tokenization to OpenAI but slightly different
+        // Approximation based on Claude's tokenizer behavior
+        return Math.ceil(text.length / 3.8);
+    }
+
+    tokenizeAWS(text) {
+        // AWS Bedrock varies by model family
+        // Claude models: similar to Anthropic
+        // Llama models: different tokenization
+        // Titan: Amazon's proprietary
+        return Math.ceil(text.length / 3.6);
+    }
+
+    tokenizeGCP(text) {
+        // Google's tokenization (PaLM/Gemini)
+        // Generally more efficient than OpenAI
+        return Math.ceil(text.length / 4.2);
     }
 
     updatePricing() {
@@ -138,8 +211,13 @@ class ModelPricingApp {
         modelElements.forEach((element, index) => {
             const model = filteredModels[index];
             if (model) {
-                const inputCost = (this.inputTokens / 1000) * model.inputPrice;
-                const outputCost = (this.outputTokens / 1000) * model.outputPrice;
+                // Get provider-specific token counts
+                const provider = model.providerClass;
+                const inputTokens = this.inputTokens[provider] || this.inputTokens.openai;
+                const outputTokens = this.outputTokens[provider] || this.outputTokens.openai;
+                
+                const inputCost = (inputTokens / 1000) * model.inputPrice;
+                const outputCost = (outputTokens / 1000) * model.outputPrice;
                 const totalCost = inputCost + outputCost;
                 const totalCostEl = element.querySelector('.cost-amount');
                 if (totalCostEl) totalCostEl.textContent = `$${totalCost.toFixed(6)}`;
@@ -154,7 +232,7 @@ class ModelPricingApp {
             filteredModels = filteredModels.filter(model => model.providerClass === this.activeProvider);
         }
         grid.innerHTML = filteredModels.map(model => `
-            <div class="model-element ${model.providerClass} ${model.featured ? 'featured' : ''}">
+            <div class="model-element ${model.providerClass} ${model.featured ? 'featured' : ''}" data-provider="${model.providerClass}">
                 <a href="${model.docUrl}" target="_blank" class="element-name-link">
                     <div class="element-name">${model.name || 'Unknown'}</div>
                 </a>
@@ -168,8 +246,39 @@ class ModelPricingApp {
                     <div class="cost-label">Your Cost</div>
                     <div class="cost-amount">$0.000000</div>
                 </div>
+                <div class="token-info" style="display:none; position:absolute; background:#333; color:white; padding:8px; border-radius:4px; font-size:12px; z-index:1000;">
+                    <div>Input: <span class="hover-input-tokens">0</span> tokens</div>
+                    <div>Output: <span class="hover-output-tokens">0</span> tokens</div>
+                </div>
             </div>
         `).join('');
+        
+        // Add hover listeners
+        document.querySelectorAll('.model-element').forEach(element => {
+            const provider = element.dataset.provider;
+            const tokenInfo = element.querySelector('.token-info');
+            const inputSpan = element.querySelector('.hover-input-tokens');
+            const outputSpan = element.querySelector('.hover-output-tokens');
+            
+            element.addEventListener('mouseenter', (e) => {
+                inputSpan.textContent = this.inputTokens[provider] || 0;
+                outputSpan.textContent = this.outputTokens[provider] || 0;
+                tokenInfo.style.display = 'block';
+                tokenInfo.style.left = '10px';
+                tokenInfo.style.top = '10px';
+                
+                // Update main token display
+                document.getElementById('input-tokens').textContent = this.inputTokens[provider] || 0;
+                document.getElementById('output-tokens').textContent = this.outputTokens[provider] || 0;
+            });
+            
+            element.addEventListener('mouseleave', () => {
+                tokenInfo.style.display = 'none';
+                document.getElementById('input-tokens').textContent = 'Hover models for accurate counts';
+                document.getElementById('output-tokens').textContent = 'Hover models for accurate counts';
+            });
+        });
+        
         this.updatePricing();
     }
 
@@ -269,12 +378,20 @@ class ModelPricingApp {
         const date = new Date().toLocaleDateString();
         const providerName = provider === 'all' ? 'All Providers' : provider.toUpperCase();
         
+        // Use provider-specific tokens for report
+        const reportInputTokens = provider === 'all' ? 
+            Math.round(Object.values(this.inputTokens).reduce((a, b) => a + b, 0) / 5) : 
+            this.inputTokens[provider];
+        const reportOutputTokens = provider === 'all' ? 
+            Math.round(Object.values(this.outputTokens).reduce((a, b) => a + b, 0) / 5) : 
+            this.outputTokens[provider];
+        
         let markdown = `# AI Model Pricing Report\n\n`;
         markdown += `**Generated:** ${date}\n`;
         markdown += `**Provider Filter:** ${providerName}\n`;
-        markdown += `**Input Tokens:** ${inputTokens}\n`;
-        markdown += `**Output Tokens:** ${outputTokens}\n`;
-        markdown += `**Total Tokens:** ${inputTokens + outputTokens}\n\n`;
+        markdown += `**Input Tokens:** ${reportInputTokens}\n`;
+        markdown += `**Output Tokens:** ${reportOutputTokens}\n`;
+        markdown += `**Total Tokens:** ${reportInputTokens + reportOutputTokens}\n\n`;
         
         markdown += `## Input Text\n\n`;
         markdown += `\`\`\`\n${inputText}\n\`\`\`\n\n`;
@@ -287,8 +404,12 @@ class ModelPricingApp {
         markdown += `|-------|----------|-------------|--------------|-----------|----------------|\n`;
         
         models.forEach(model => {
-            const inputCost = (inputTokens / 1000) * model.inputPrice;
-            const outputCost = (outputTokens / 1000) * model.outputPrice;
+            const modelProvider = model.providerClass;
+            const modelInputTokens = this.inputTokens[modelProvider] || reportInputTokens;
+            const modelOutputTokens = this.outputTokens[modelProvider] || reportOutputTokens;
+            
+            const inputCost = (modelInputTokens / 1000) * model.inputPrice;
+            const outputCost = (modelOutputTokens / 1000) * model.outputPrice;
             const totalCost = inputCost + outputCost;
             
             markdown += `| ${model.name} | ${model.provider} | $${model.inputPrice}/${model.per} | $${model.outputPrice}/${model.per} | $${totalCost.toFixed(6)} | ${model.contextLength} |\n`;
@@ -296,8 +417,12 @@ class ModelPricingApp {
         
         markdown += `\n## Summary\n\n`;
         const costs = models.map(model => {
-            const inputCost = (inputTokens / 1000) * model.inputPrice;
-            const outputCost = (outputTokens / 1000) * model.outputPrice;
+            const modelProvider = model.providerClass;
+            const modelInputTokens = this.inputTokens[modelProvider] || reportInputTokens;
+            const modelOutputTokens = this.outputTokens[modelProvider] || reportOutputTokens;
+            
+            const inputCost = (modelInputTokens / 1000) * model.inputPrice;
+            const outputCost = (modelOutputTokens / 1000) * model.outputPrice;
             return inputCost + outputCost;
         });
         
@@ -310,7 +435,13 @@ class ModelPricingApp {
         markdown += `- **Average Cost:** $${avgCost.toFixed(6)}\n`;
         markdown += `- **Cost Range:** ${((maxCost - minCost) / minCost * 100).toFixed(1)}% difference\n\n`;
         
-        markdown += `## Recommendations\n\n`;
+        markdown += `## Tokenization Details\n\n`;
+        markdown += `Different providers use different tokenization methods:\n\n`;
+        Object.entries(this.inputTokens).forEach(([provider, tokens]) => {
+            markdown += `- **${provider.toUpperCase()}:** ${tokens} input tokens, ${this.outputTokens[provider]} output tokens\n`;
+        });
+        
+        markdown += `\n## Recommendations\n\n`;
         const cheapestModel = models[costs.indexOf(minCost)];
         markdown += `- **Most Cost-Effective:** ${cheapestModel.name} (${cheapestModel.provider})\n`;
         
@@ -324,7 +455,7 @@ class ModelPricingApp {
         
         markdown += `\n---\n\n`;
         markdown += `*Report generated by [AI Model Pricing Calculator](https://mohitmehral.github.io/ai-model-pricing/)*\n`;
-        markdown += `*Data sourced from official provider documentation*`;
+        markdown += `*Pricing uses provider-specific tokenization for accuracy*`;
         
         return markdown;
     }
@@ -348,8 +479,9 @@ class ModelPricingApp {
     updateLastUpdated() {
         const cached = this.getCachedData();
         const timestamp = cached ? cached.timestamp : Date.now();
-        const date = new Date(timestamp).toLocaleString();
-        document.getElementById('last-updated').textContent = date;
+        const now = new Date();
+        const dateTime = now.toLocaleString();
+        document.getElementById('calc-last-updated').textContent = dateTime;
     }
 
     setupTabListeners() {

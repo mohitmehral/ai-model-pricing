@@ -724,3 +724,66 @@ textarea:focus {
         padding: 1rem;
     }
 }
+/* Token info tooltip styles */
+.info-icon {
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: 8px;
+    background: #4CAF50;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-weight: bold;
+}
+
+.info-icon:hover {
+    background: #45a049;
+    transform: scale(1.1);
+}
+
+.token-info-tooltip {
+    display: none;
+    position: absolute;
+    background: #333;
+    color: white;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    max-width: 300px;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    line-height: 1.4;
+    top: 40px;
+    left: 0;
+}
+
+.token-info-tooltip strong {
+    color: #4CAF50;
+}
+
+.calculator {
+    position: relative;
+}
+/* Calculator header styles */
+.calculator-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.pricing-updated {
+    font-size: 11px;
+    color: #666;
+    opacity: 0.8;
+    font-weight: normal;
+}
+
+.pricing-updated time {
+    color: #4CAF50;
+}
