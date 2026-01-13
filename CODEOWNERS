@@ -1,0 +1,8 @@
+# Global code ownership
+* @mohitmehral
+
+# Specific file ownership
+*.html @mohitmehral
+*.css @mohitmehral
+*.js @mohitmehral
+*.md @mohitmehral

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Model Pricing Calculator - Compare AWS, Azure, OpenAI, Anthropic & GCP Costs</title>
+    <meta name="description" content="Free AI model pricing calculator to compare costs across AWS Bedrock, Azure OpenAI, Google Cloud Vertex AI, OpenAI, and Anthropic. Real-time token calculation and pricing comparison for 47+ AI models.">
+    <meta name="keywords" content="AI pricing calculator, OpenAI pricing, AWS Bedrock cost, Azure OpenAI pricing, Anthropic Claude pricing, Google Cloud AI pricing, AI model comparison, token calculator, LLM pricing">
+    <meta name="author" content="Mohit Mehral">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://mohitmehral.github.io/ai-model-pricing/">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://mohitmehral.github.io/ai-model-pricing/">
+    <meta property="og:title" content="AI Model Pricing Calculator - Compare AWS, Azure, OpenAI & More">
+    <meta property="og:description" content="Compare AI model pricing across 47+ models from AWS, Azure, OpenAI, Anthropic & Google Cloud. Free token calculator with real-time cost estimates.">
+    <meta property="og:image" content="https://mohitmehral.github.io/ai-model-pricing/og-image.png">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://mohitmehral.github.io/ai-model-pricing/">
+    <meta property="twitter:title" content="AI Model Pricing Calculator - Compare AWS, Azure, OpenAI & More">
+    <meta property="twitter:description" content="Compare AI model pricing across 47+ models from AWS, Azure, OpenAI, Anthropic & Google Cloud. Free token calculator with real-time cost estimates.">
+    <meta property="twitter:image" content="https://mohitmehral.github.io/ai-model-pricing/og-image.png">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "AI Model Pricing Calculator",
+      "description": "Compare pricing across AWS Bedrock, Azure OpenAI, Google Cloud Vertex AI, OpenAI, and Anthropic AI models with real-time token calculation.",
+      "url": "https://mohitmehral.github.io/ai-model-pricing/",
+      "author": {
+        "@type": "Person",
+        "name": "Mohit Mehral"
+      },
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>AI Model Pricing Calculator</h1>
+        <p>Compare pricing across AWS Bedrock, Azure OpenAI, Google Cloud Vertex AI, OpenAI, and Anthropic</p>
+    </header>
+
+    <main>
+        <!-- Top Tables Section -->
+        <section class="top-tables">
+            <div class="table-tabs">
+                <button class="table-tab active" data-table="pricing">Pricing</button>
+                <button class="table-tab" data-table="services">Services</button>
+            </div>
+            
+            <!-- Pricing Calculator Section -->
+            <div class="table-container" id="pricing-table">
+                <section class="calculator">
+                    <h2>AI Token Calculator</h2>
+                    <div class="calc-inputs">
+                        <div class="input-group">
+                            <label for="input-text">Input Text:</label>
+                            <textarea id="input-text" placeholder="Enter your AI prompt here..." aria-label="Input text for AI model pricing calculation">How to use this pricing calculator via adding your input text</textarea>
+                            <div class="token-text">Input Tokens: <strong id="input-tokens">0</strong></div>
+                        </div>
+                        <div class="input-group">
+                            <label for="output-text">Expected Output:</label>
+                            <textarea id="output-text" placeholder="Estimate expected AI response length..." aria-label="Expected output text for pricing estimation">This AI Model Pricing Calculator helps you compare costs across different AI providers including AWS Bedrock, Azure OpenAI, Google Cloud Vertex AI, OpenAI, and Anthropic. Simply enter your input text in the first box and expected output in the second box to see real-time pricing calculations.
+
+PRICING USAGE:
+- Input tokens are calculated from your prompt text
+- Output tokens estimated from expected response length
+- Costs shown per 1K tokens for each model
+- Real-time cost calculation as you type
+- Filter by provider (AWS, Azure, OpenAI, etc.)
+- Compare pricing across all major AI services
+
+SERVICE USAGE:
+- Browse AI services by provider in the Services tab
+- Filter services by type (Text AI, Image AI, Speech AI)
+- Direct links to official documentation
+- Interactive service cards with detailed descriptions
+- Easy navigation between pricing and service information
+
+This tool helps developers, businesses, and researchers make informed decisions about AI model selection based on both cost and capabilities.</textarea>
+                            <div class="token-text">Output Tokens: <strong id="output-tokens">0</strong></div>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="pricing-filters" aria-label="AI Provider Filter Options">
+                    <h3 class="sr-only">Filter AI Models by Provider</h3>
+                    <div class="provider-tabs" role="tablist">
+                        <button class="tab-button active" data-provider="all" role="tab" aria-selected="true">All (<span id="all-count">0</span>)</button>
+                        <button class="tab-button" data-provider="aws" role="tab" aria-selected="false">AWS (<span id="aws-count">0</span>)</button>
+                        <button class="tab-button" data-provider="azure" role="tab" aria-selected="false">Azure (<span id="azure-count">0</span>)</button>
+                        <button class="tab-button" data-provider="openai" role="tab" aria-selected="false">OpenAI (<span id="openai-count">0</span>)</button>
+                        <button class="tab-button" data-provider="anthropic" role="tab" aria-selected="false">Anthropic (<span id="anthropic-count">0</span>)</button>
+                        <button class="tab-button" data-provider="gcp" role="tab" aria-selected="false">GCP (<span id="gcp-count">0</span>)</button>
+                    </div>
+                    <div class="download-links">
+                        <a href="#" id="download-md" class="download-link">Download MD</a>
+                        <span class="separator">|</span>
+                        <a href="#" id="download-pdf" class="download-link">Download PDF</a>
+                    </div>
+                </section>
+                
+                <section class="models-periodic" id="models-periodic" aria-label="AI Model Pricing Comparison Grid">
+                    <h3 class="sr-only">AI Model Pricing Cards</h3>
+                    <!-- Models will be populated by JavaScript -->
+                </section>
+            </div>
+            
+            <!-- Services Mind Map -->
+            <div class="table-container hidden" id="services-table">
+                <div class="mindmap-container">
+                    <svg id="services-mindmap" width="100%" height="600">
+                        <!-- Mind map will be generated by JavaScript -->
+                    </svg>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section class="pricing-info">
+            <p>Prices updated: <time id="last-updated">Loading...</time></p>
+            <nav class="official-sources" aria-label="Official AI Provider Documentation">
+                <h3>Official Pricing Documentation</h3>
+                <div class="sources-grid">
+                    <a href="https://aws.amazon.com/bedrock/pricing/" target="_blank" rel="noopener" class="source-link aws" aria-label="AWS Bedrock official pricing documentation">AWS Bedrock Pricing</a>
+                    <a href="https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/" target="_blank" rel="noopener" class="source-link azure" aria-label="Azure OpenAI official pricing documentation">Azure OpenAI Pricing</a>
+                    <a href="https://openai.com/pricing" target="_blank" rel="noopener" class="source-link openai" aria-label="OpenAI official pricing documentation">OpenAI Pricing</a>
+                    <a href="https://www.anthropic.com/pricing" target="_blank" rel="noopener" class="source-link anthropic" aria-label="Anthropic Claude official pricing documentation">Anthropic Pricing</a>
+                    <a href="https://cloud.google.com/vertex-ai/pricing" target="_blank" rel="noopener" class="source-link gcp" aria-label="Google Cloud Vertex AI official pricing documentation">Google Cloud Pricing</a>
+                </div>
+                <p class="update-note">All pricing data sourced from official provider documentation and updated regularly.</p>
+            </nav>
+        </section>
+        <div class="footer-credits">
+            <p>&copy; 2026 AI Model Pricing Calculator. Built by <a href="https://github.com/mohitmehral" target="_blank" rel="noopener">Mohit Mehral</a></p>
+        </div>
+    </footer>
+
+    <script src="script-new.js"></script>
+</body>
+</html>
