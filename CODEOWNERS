@@ -1,8 +1,8 @@
 # Global code ownership
-* @mohitmehral
+* @mohitmehral @copilot-founder
 
 # Specific file ownership
-*.html @mohitmehral
-*.css @mohitmehral
-*.js @mohitmehral
-*.md @mohitmehral
+*.html @mohitmehral @copilot-founder
+*.css @mohitmehral @copilot-founder
+*.js @mohitmehral @copilot-founder
+*.md @mohitmehral @copilot-founder
