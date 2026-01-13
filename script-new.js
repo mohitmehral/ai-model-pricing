@@ -24,8 +24,8 @@ class ModelPricingApp {
         this.updateModelCounts();
         this.renderModels();
         this.createMindMap();
-        this.updateLastUpdated();
         this.calculateTokens();
+        this.updateLastUpdated();
     }
 
     async initializeTokenizers() {
@@ -477,11 +477,12 @@ class ModelPricingApp {
     }
 
     updateLastUpdated() {
-        const cached = this.getCachedData();
-        const timestamp = cached ? cached.timestamp : Date.now();
         const now = new Date();
         const dateTime = now.toLocaleString();
-        document.getElementById('calc-last-updated').textContent = dateTime;
+        const element = document.getElementById('calc-last-updated');
+        if (element) {
+            element.textContent = dateTime;
+        }
     }
 
     setupTabListeners() {
