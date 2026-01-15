@@ -4,7 +4,7 @@ A comprehensive web application to compare pricing across major AI providers inc
 
 ## Features
 
-### 🧮 Pricing Calculator
+###  Pricing Calculator
 - **Real-time token calculation** from input/output text
 - **Provider-specific tokenization** for accurate pricing
 - **47+ AI models** across all major providers
@@ -12,7 +12,7 @@ A comprehensive web application to compare pricing across major AI providers inc
 - **Professional card design** with scrollable interface
 - **Cost comparison** with live pricing updates
 
-### 🚀 AI Services Hub
+###  AI Services Hub
 - **23+ AI services** comprehensively covered
 - **Interactive filtering** by service type (Text AI, Image AI, Speech AI)
 - **Modern card-based design** with provider badges
@@ -20,7 +20,7 @@ A comprehensive web application to compare pricing across major AI providers inc
 
 ## Live Demo
 
-🌐 **[Visit AI Model Pricing Calculator](https://mohitmehral.github.io/ai-model-pricing/)**
+ **[Visit AI Model Pricing Calculator](https://mohitmehral.github.io/ai-model-pricing/)**
 
 ## Tokenization Accuracy
 
