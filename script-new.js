@@ -148,6 +148,15 @@ class ModelPricingApp {
                 tooltip.style.display = 'none';
             }
         });
+        
+        // Tokenization accordion
+        const tokenHeader = document.getElementById('tokenization-header');
+        const tokenContent = document.getElementById('tokenization-content');
+        
+        tokenHeader.addEventListener('click', () => {
+            tokenHeader.classList.toggle('expanded');
+            tokenContent.classList.toggle('expanded');
+        });
     }
 
     calculateTokens() {
