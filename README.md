@@ -18,7 +18,7 @@ A comprehensive web application to compare pricing across major AI providers inc
 - **Modern card-based design** with provider badges
 - **Direct links** to official documentation
 
-## Live Demo
+## Live Demo###
 
  **[Visit AI Model Pricing Calculator](https://mohitmehral.github.io/ai-model-pricing/)**
 
